@@ -4,10 +4,44 @@
 		<meta charset="UTF-8" />
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Hello World</title>
+		<title>YouTube Downloader</title>
 	</head>
 	<body>
-		<h1>Hello World</h1>
-		We are using Node.js <span id="node-version"></span>, Chromium <span id="chrome-version"></span>, and Electron <span id="electron-version"></span>.
+		<div class="body">
+			<div class="header">
+				<img
+					alt="svgImg"
+					src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHg9IjBweCIgeT0iMHB4Igp3aWR0aD0iMTQ0IiBoZWlnaHQ9IjE0NCIKdmlld0JveD0iMCAwIDQ4IDQ4IgpzdHlsZT0iIGZpbGw6IzAwMDAwMDsiPjxwYXRoIGZpbGw9IiNGRjNEMDAiIGQ9Ik00My4yLDMzLjljLTAuNCwyLjEtMi4xLDMuNy00LjIsNGMtMy4zLDAuNS04LjgsMS4xLTE1LDEuMWMtNi4xLDAtMTEuNi0wLjYtMTUtMS4xYy0yLjEtMC4zLTMuOC0xLjktNC4yLTRDNC40LDMxLjYsNCwyOC4yLDQsMjRjMC00LjIsMC40LTcuNiwwLjgtOS45YzAuNC0yLjEsMi4xLTMuNyw0LjItNEMxMi4zLDkuNiwxNy44LDksMjQsOWM2LjIsMCwxMS42LDAuNiwxNSwxLjFjMi4xLDAuMywzLjgsMS45LDQuMiw0YzAuNCwyLjMsMC45LDUuNywwLjksOS45QzQ0LDI4LjIsNDMuNiwzMS42LDQzLjIsMzMuOXoiPjwvcGF0aD48cGF0aCBmaWxsPSIjRkZGIiBkPSJNMjAgMzFMMjAgMTcgMzIgMjR6Ij48L3BhdGg+PC9zdmc+"
+				/>
+				<h1>YouTube Downloader</h1>
+			</div>
+			<!-- prettier-ignore -->
+			<div class="content-wrapper">
+                <form>
+                    <div class="form-items">
+                        <label for="url" style="padding-right: 10px;">Enter YouTube/Spotify URL:</label>
+                        <input type="text" id="url" placeholder="https://youtube.com/watch?v=dQw4w9WgXcQ">
+                    </div>
+                    <div class="break"></div>
+                    <div style="width:100%;">
+                        <input type="submit" value="Download" id="download" style="
+                            float: right !important;
+                            display: block;
+                            width: auto !important;
+                            height: auto !important;
+                            background: #2caa71;
+                            padding: 10px  20px !important;
+                            text-align: center;
+                            border-radius: 5px;
+                            color: white !important;
+                            font-family: inherit !important;
+                            font-weight: bold !important;
+                            line-height: 25px;
+                        ">
+                    </div>
+                </form>
+            </div>
+		</div>
 	</body>
+	<link rel="stylesheet" href="styles.css" />
 </html>
