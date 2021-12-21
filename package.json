@@ -1,0 +1,48 @@
+{
+	"name": "test-electron-app",
+	"version": "1.0.0",
+	"description": "Electron app for testing purposes",
+	"main": "main.js",
+	"scripts": {
+		"start": "electron .",
+		"package": "electron-forge package",
+		"make": "electron-forge make"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Flamebullet/test-electron-app.git"
+	},
+	"author": "Flame",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/Flamebullet/test-electron-app/issues"
+	},
+	"homepage": "https://github.com/Flamebullet/test-electron-app#readme",
+	"devDependencies": {
+		"@electron-forge/cli": "^6.0.0-beta.61",
+		"@electron-forge/maker-deb": "^6.0.0-beta.61",
+		"@electron-forge/maker-rpm": "^6.0.0-beta.61",
+		"@electron-forge/maker-squirrel": "^6.0.0-beta.61",
+		"@electron-forge/maker-zip": "^6.0.0-beta.61",
+		"electron": "^16.0.5"
+	},
+	"config": {
+		"forge": {
+			"packagerConfig": {
+				"name": "testapp"
+			},
+			"makers": [
+				{
+					"name": "@electron-forge/maker-squirrel",
+					"config": {
+						"name": "testapp",
+						"exe": "testapp.exe"
+					}
+				}
+			]
+		}
+	},
+	"dependencies": {
+		"electron-squirrel-startup": "^1.0.0"
+	}
+}
