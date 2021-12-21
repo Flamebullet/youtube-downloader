@@ -39,6 +39,20 @@
 						"exe": "testapp.exe"
 					}
 				}
+			],
+			"publishers": [
+				{
+					"name": "@electron-forge/publisher-github",
+					"platforms": [
+						"win32"
+					],
+					"config": {
+						"repository": {
+							"owner": "Flame",
+							"name": "testapp"
+						}
+					}
+				}
 			]
 		}
 	},
