@@ -1,24 +1,24 @@
 {
 	"name": "test-electron-app",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "Electron app for testing purposes",
 	"main": "main.js",
 	"scripts": {
 		"start": "electron .",
 		"package": "electron-forge package",
 		"make": "electron-forge make",
-		"publish": "electron-forge publish"
+		"publish": "env-cmd electron-forge publish"
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/Flamebullet/test-electron-app.git"
+		"url": "git+https://github.com/Flamebullet/youtube-downloader.git"
 	},
 	"author": "Flame",
 	"license": "MIT",
 	"bugs": {
-		"url": "https://github.com/Flamebullet/test-electron-app/issues"
+		"url": "https://github.com/Flamebullet/youtube-downloader.git"
 	},
-	"homepage": "https://github.com/Flamebullet/test-electron-app#readme",
+	"homepage": "https://github.com/Flamebullet/youtube-downloader#readme",
 	"devDependencies": {
 		"@electron-forge/cli": "^6.0.0-beta.61",
 		"@electron-forge/maker-deb": "^6.0.0-beta.61",
@@ -31,7 +31,10 @@
 	"config": {
 		"forge": {
 			"packagerConfig": {
-				"name": "testapp"
+				"name": "testapp",
+				"osxSign": {
+					"identity": "Developer ID Application: Test"
+				}
 			},
 			"makers": [
 				{
@@ -51,16 +54,16 @@
 					"config": {
 						"repository": {
 							"owner": "Flamebullet",
-							"name": "test-electron-app"
+							"name": "youtube-downloader"
 						},
-						"draft": true,
-						"authToken": "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"
+						"draft": true
 					}
 				}
 			]
 		}
 	},
 	"dependencies": {
-		"electron-squirrel-startup": "^1.0.0"
+		"electron-squirrel-startup": "^1.0.0",
+		"env-cmd": "^10.1.0"
 	}
 }

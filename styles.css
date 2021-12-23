@@ -19,6 +19,7 @@
 }
 
 body {
+	padding-top: 100px;
 	display: grid;
 	place-items: center;
 }
