@@ -8,23 +8,57 @@
 	</head>
 	<body>
 		<div class="body">
-			<div class="header">
-				<img
-					alt="svgImg"
-					src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHg9IjBweCIgeT0iMHB4Igp3aWR0aD0iMTQ0IiBoZWlnaHQ9IjE0NCIKdmlld0JveD0iMCAwIDQ4IDQ4IgpzdHlsZT0iIGZpbGw6IzAwMDAwMDsiPjxwYXRoIGZpbGw9IiNGRjNEMDAiIGQ9Ik00My4yLDMzLjljLTAuNCwyLjEtMi4xLDMuNy00LjIsNGMtMy4zLDAuNS04LjgsMS4xLTE1LDEuMWMtNi4xLDAtMTEuNi0wLjYtMTUtMS4xYy0yLjEtMC4zLTMuOC0xLjktNC4yLTRDNC40LDMxLjYsNCwyOC4yLDQsMjRjMC00LjIsMC40LTcuNiwwLjgtOS45YzAuNC0yLjEsMi4xLTMuNyw0LjItNEMxMi4zLDkuNiwxNy44LDksMjQsOWM2LjIsMCwxMS42LDAuNiwxNSwxLjFjMi4xLDAuMywzLjgsMS45LDQuMiw0YzAuNCwyLjMsMC45LDUuNywwLjksOS45QzQ0LDI4LjIsNDMuNiwzMS42LDQzLjIsMzMuOXoiPjwvcGF0aD48cGF0aCBmaWxsPSIjRkZGIiBkPSJNMjAgMzFMMjAgMTcgMzIgMjR6Ij48L3BhdGg+PC9zdmc+"
-				/>
-				<h1>YouTube Downloader</h1>
-			</div>
-			<!-- prettier-ignore -->
+			<div></div>
+			<div></div>
+			<div></div>
+			<div></div>
 			<div class="content-wrapper">
-                <form>
-                    <div class="form-items">
-                        <label for="url" style="padding-right: 10px;">Enter YouTube/Spotify URL:</label>
-                        <input type="text" id="url" placeholder="https://youtube.com/watch?v=dQw4w9WgXcQ">
-                    </div>
-                    <div class="break"></div>
+				<div class="header">
+					<div>
+						<img
+							alt="svgImg"
+							src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHg9IjBweCIgeT0iMHB4Igp3aWR0aD0iMTQ0IiBoZWlnaHQ9IjE0NCIKdmlld0JveD0iMCAwIDQ4IDQ4IgpzdHlsZT0iIGZpbGw6IzAwMDAwMDsiPjxwYXRoIGZpbGw9IiNGRjNEMDAiIGQ9Ik00My4yLDMzLjljLTAuNCwyLjEtMi4xLDMuNy00LjIsNGMtMy4zLDAuNS04LjgsMS4xLTE1LDEuMWMtNi4xLDAtMTEuNi0wLjYtMTUtMS4xYy0yLjEtMC4zLTMuOC0xLjktNC4yLTRDNC40LDMxLjYsNCwyOC4yLDQsMjRjMC00LjIsMC40LTcuNiwwLjgtOS45YzAuNC0yLjEsMi4xLTMuNyw0LjItNEMxMi4zLDkuNiwxNy44LDksMjQsOWM2LjIsMCwxMS42LDAuNiwxNSwxLjFjMi4xLDAuMywzLjgsMS45LDQuMiw0YzAuNCwyLjMsMC45LDUuNywwLjksOS45QzQ0LDI4LjIsNDMuNiwzMS42LDQzLjIsMzMuOXoiPjwvcGF0aD48cGF0aCBmaWxsPSIjRkZGIiBkPSJNMjAgMzFMMjAgMTcgMzIgMjR6Ij48L3BhdGg+PC9zdmc+"
+						/>
+						<h1 style="width: 425px">YouTube Downloader</h1>
+					</div>
+				</div>
+				<div>
+					<button
+						id="toggle-dark-mode"
+						style="
+							width: auto !important;
+							height: auto !important;
+
+							text-align: center;
+							border-radius: 5px;
+							font-family: inherit !important;
+							font-weight: bold !important;
+							line-height: 25px;
+						"
+					>
+						Toggle Dark Mode
+					</button>
+					<button
+						id="reset-to-system"
+						style="
+							width: auto !important;
+							height: auto !important;
+							text-align: center;
+							border-radius: 5px;
+							font-family: inherit !important;
+							font-weight: bold !important;
+							line-height: 25px;
+						"
+					>
+						Reset to System Theme
+					</button>
+				</div>
+				<!-- prettier-ignore -->
+				<form>
+                    <label for="url" style="  display: flex; align-items: flex-end; padding-bottom: 10px;">Enter YouTube/Spotify URL:</label>
+                    <input type="text" id="url" placeholder="https://youtube.com/watch?v=dQw4w9WgXcQ">
                     <div style="width:100%;">
-                        <input type="submit" value="Download" id="download" style="
+                        <button type="submit"  id="download" style="
                             float: right !important;
                             display: block;
                             width: auto !important;
@@ -37,11 +71,17 @@
                             font-family: inherit !important;
                             font-weight: bold !important;
                             line-height: 25px;
-                        ">
+                        ">Download</button>
                     </div>
                 </form>
-            </div>
+			</div>
+			<div></div>
+			<div></div>
+			<div></div>
+			<div></div>
 		</div>
 	</body>
+	<script src="renderer.js"></script>
+	<script src="preload.js"></script>
 	<link rel="stylesheet" href="styles.css" />
 </html>
