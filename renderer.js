@@ -14,17 +14,26 @@ const videoRegex = /^\s*\<?(https?:\/\/)?((w{3}\.)|(m\.)|(music\.))?(youtube\.co
 const spotifyMusicRegex = /^\s*\<?(https?:\/\/)?(open\.spotify\.com\/track\/)(?<urlkey>[\S]{22})(\?si\=\S{0,22})?\>?\s*/gim;
 
 // Set text for version
-updater.init('https://raw.githubusercontent.com/Flamebullet/youtube-downloader/main/updates.json');
 document.getElementById('version').innerText = updater.version;
 attachUpdaterHandlers();
+updater.checkForUpdates();
 let downloadingUpdates = false;
 
 // Handling updates
 function attachUpdaterHandlers() {
+	updater.on('update-available', onUpdateAvailable);
 	updater.on('update-downloading', onUpdateDownloading);
 	updater.on('update-downloaded', onUpdateDownloaded);
 
+	function onUpdateAvailable() {
+		console.log('update available');
+		downloadingUpdates = true;
+		document.getElementById('version').innerText = 'Downloading new update...';
+		updater.downloadUpdate();
+	}
+
 	function onUpdateDownloading() {
+		console.log('update downloading');
 		downloadingUpdates = true;
 		document.getElementById('version').innerText = 'Downloading new update...';
 	}
