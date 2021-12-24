@@ -1,0 +1,8 @@
+{
+	"win32-x64-prod": {
+		"readme": "Second release",
+		"update": "https://github.com/Flamebullet/youtube-downloader/releases/download/v1.0.2",
+		"install": "https://github.com/Flamebullet/youtube-downloader/releases/download/v1.0.0/YouTube-Downloader-1.0.2.Setup.exe",
+		"version": "1.0.2"
+	}
+}

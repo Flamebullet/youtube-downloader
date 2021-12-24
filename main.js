@@ -1,9 +1,11 @@
 const { app, BrowserWindow, ipcMain, nativeTheme } = require('electron');
 const path = require('path');
 const checkInternetConnected = require('check-internet-connected');
+const updater = require('electron-simple-updater');
 
 if (require('electron-squirrel-startup')) return app.quit();
 
+updater.init('https://raw.githubusercontent.com/Flamebullet/youtube-downloader/main/updates.json');
 // Create Application window
 const createWindow = () => {
 	// Application window settings
