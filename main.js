@@ -1,11 +1,10 @@
 const { app, BrowserWindow, ipcMain, nativeTheme } = require('electron');
 const path = require('path');
 const checkInternetConnected = require('check-internet-connected');
-const updater = require('electron-simple-updater');
+require('@electron/remote/main').initialize();
 
 if (require('electron-squirrel-startup')) return app.quit();
 
-updater.init('https://raw.githubusercontent.com/Flamebullet/youtube-downloader/main/updates.json');
 // Create Application window
 const createWindow = () => {
 	// Application window settings
@@ -19,9 +18,11 @@ const createWindow = () => {
 			nodeIntegration: true,
 			contextIsolation: false,
 			enableRemoteModule: true,
-			devTools: false
+			devTools: true
 		}
 	});
+
+	require('@electron/remote/main').enable(win.webContents);
 
 	win.setIcon(path.join(__dirname, '/content/youtube-icon.ico'));
 	// win.webContents.openDevTools();

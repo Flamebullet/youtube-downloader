@@ -1,6 +1,6 @@
 {
 	"name": "youtube-downloader",
-	"version": "1.0.2",
+	"version": "1.0.4",
 	"description": "Application to download YouTube Videos",
 	"main": "main.js",
 	"scripts": {
@@ -64,6 +64,7 @@
 		}
 	},
 	"dependencies": {
+		"@electron/remote": "^2.0.1",
 		"check-internet-connected": "^2.0.5",
 		"child_process": "^1.0.2",
 		"electron-simple-updater": "^2.0.11",

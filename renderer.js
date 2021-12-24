@@ -1,4 +1,6 @@
 const { ipcRenderer } = require('electron');
+const remote = require('@electron/remote');
+const updater = remote.require('electron-simple-updater');
 
 const fs = require('fs');
 const cp = require('child_process');
@@ -10,6 +12,28 @@ const swal = require('sweetalert');
 
 const videoRegex = /^\s*\<?(https?:\/\/)?((w{3}\.)|(m\.)|(music\.))?(youtube\.com\/(watch\?(\S+)?v\=)|youtu\.be\/)(?<urlkey>[\S]{11})\>?\s*/gim;
 const spotifyMusicRegex = /^\s*\<?(https?:\/\/)?(open\.spotify\.com\/track\/)(?<urlkey>[\S]{22})(\?si\=\S{0,22})?\>?\s*/gim;
+
+// Set text for version
+updater.init('https://raw.githubusercontent.com/Flamebullet/youtube-downloader/main/updates.json');
+document.getElementById('version').innerText = updater.version;
+attachUpdaterHandlers();
+let downloadingUpdates = false;
+
+// Handling updates
+function attachUpdaterHandlers() {
+	updater.on('update-downloading', onUpdateDownloading);
+	updater.on('update-downloaded', onUpdateDownloaded);
+
+	function onUpdateDownloading() {
+		downloadingUpdates = true;
+		document.getElementById('version').innerText = 'Downloading new update...';
+	}
+
+	function onUpdateDownloaded() {
+		downloadingUpdates = false;
+		updater.quitAndInstall();
+	}
+}
 
 // Get download url when download button clicked
 document.getElementById('download').addEventListener('click', async (event) => {
@@ -236,4 +260,11 @@ document.getElementById('toggle-dark-mode').addEventListener('click', async () =
 document.getElementById('reset-to-system').addEventListener('click', async () => {
 	// await window.darkMode.system();
 	ipcRenderer.invoke('dark-mode:system');
+});
+
+window.addEventListener('beforeunload', function (e) {
+	if (downloadingUpdates) {
+		e.returnValue = '';
+		swal('Update downloading', 'Closing of application will only be available after application is updated', 'info');
+	}
 });
