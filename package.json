@@ -1,7 +1,7 @@
 {
-	"name": "test-electron-app",
-	"version": "1.0.1",
-	"description": "Electron app for testing purposes",
+	"name": "youtube-downloader",
+	"version": "1.0.0",
+	"description": "Application to download YouTube Videos",
 	"main": "main.js",
 	"scripts": {
 		"start": "electron .",
@@ -33,8 +33,9 @@
 			"packagerConfig": {
 				"name": "testapp",
 				"osxSign": {
-					"identity": "Developer ID Application: Test"
-				}
+					"identity": "Developer ID Application: YouTube Downloader"
+				},
+				"icon": "./content/youtube-icon.ico"
 			},
 			"makers": [
 				{
@@ -63,7 +64,14 @@
 		}
 	},
 	"dependencies": {
+		"check-internet-connected": "^2.0.5",
+		"child_process": "^1.0.2",
 		"electron-squirrel-startup": "^1.0.0",
-		"env-cmd": "^10.1.0"
+		"env-cmd": "^10.1.0",
+		"ffmpeg-static": "^4.4.0",
+		"fs": "^0.0.1-security",
+		"spotify-to-yt": "^1.1.1",
+		"sweetalert": "^2.1.2",
+		"ytdl-core": "^4.9.2"
 	}
 }

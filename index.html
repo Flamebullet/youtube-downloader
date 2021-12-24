@@ -4,6 +4,7 @@
 		<meta charset="UTF-8" />
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="icon" href="./content/youtube-icon.ico" />
 		<title>YouTube Downloader</title>
 	</head>
 	<body>
@@ -54,11 +55,19 @@
 					</button>
 				</div>
 				<!-- prettier-ignore -->
-				<form>
-                    <label for="url" style="  display: flex; align-items: flex-end; padding-bottom: 10px;">Enter YouTube/Spotify URL:</label>
+				<form action="#" id="downloadForm">
+                    <label for="url" style="display: flex; align-items: flex-end; padding-bottom: 10px;">Enter YouTube/Spotify URL:</label>
                     <input type="text" id="url" placeholder="https://youtube.com/watch?v=dQw4w9WgXcQ">
+                    <input type="file" id="directory" webkitdirectory hidden="true"/>
+                    <div>
+                        <span>Download with:</span>
+                        <input type="checkbox" id="audio" name="audio" checked>
+                        <label for="audio">audio</label>
+                        <input type="checkbox" id="video" name="video" checked>
+                        <label for="video">video</label>
+                    </div>
                     <div style="width:100%;">
-                        <button type="submit"  id="download" style="
+                        <button type="submit" id="download" style="
                             float: right !important;
                             display: block;
                             width: auto !important;
@@ -71,17 +80,19 @@
                             font-family: inherit !important;
                             font-weight: bold !important;
                             line-height: 25px;
+                            cursor: pointer;
                         ">Download</button>
                     </div>
                 </form>
 			</div>
 			<div></div>
 			<div></div>
-			<div></div>
+			<div>
+				<p id="download-progress"></p>
+			</div>
 			<div></div>
 		</div>
 	</body>
 	<script src="renderer.js"></script>
-	<script src="preload.js"></script>
-	<link rel="stylesheet" href="styles.css" />
+	<link rel="stylesheet" href="./content/styles.css" />
 </html>

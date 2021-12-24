@@ -1,9 +1,11 @@
 const { app, BrowserWindow, ipcMain, nativeTheme } = require('electron');
-const path = require('path');
+const checkInternetConnected = require('check-internet-connected');
 
 if (require('electron-squirrel-startup')) return app.quit();
 
+// Create Application window
 const createWindow = () => {
+	// Application window settings
 	const win = new BrowserWindow({
 		width: 900,
 		height: 600,
@@ -11,13 +13,31 @@ const createWindow = () => {
 		minHeight: 400,
 		autoHideMenuBar: true,
 		webPreferences: {
-			preload: path.join(__dirname, 'preload.js')
+			nodeIntegration: true,
+			contextIsolation: false,
+			enableRemoteModule: true,
+			devTools: false
 		}
 	});
 
-	// win.setMenuBarVisibility(false);
-	win.loadFile('index.html');
+	win.setIcon('./content/youtube-icon.ico');
+	// win.webContents.openDevTools();
 
+	const config = {
+		timeout: 5000, //timeout connecting to each try (default 5000)
+		retries: 3, //number of retries to do before failing (default 5)
+		domain: 'apple.com' //the domain to check DNS record of
+	};
+
+	checkInternetConnected(config)
+		.then(() => {
+			win.loadFile('index.html');
+		})
+		.catch(() => {
+			win.loadFile('./content/404.html');
+		});
+
+	// Dark mode code
 	ipcMain.handle('dark-mode:toggle', () => {
 		if (nativeTheme.shouldUseDarkColors) {
 			nativeTheme.themeSource = 'light';
@@ -32,6 +52,7 @@ const createWindow = () => {
 	});
 };
 
+// Create window when ready
 app.whenReady().then(() => {
 	createWindow();
 
@@ -40,6 +61,7 @@ app.whenReady().then(() => {
 	});
 });
 
+// Close window when press 'x' button
 app.on('window-all-closed', () => {
 	if (process.platform !== 'darwin') app.quit();
 });
