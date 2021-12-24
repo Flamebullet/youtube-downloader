@@ -1,4 +1,5 @@
 const { app, BrowserWindow, ipcMain, nativeTheme } = require('electron');
+const path = require('path');
 const checkInternetConnected = require('check-internet-connected');
 
 if (require('electron-squirrel-startup')) return app.quit();
@@ -20,7 +21,7 @@ const createWindow = () => {
 		}
 	});
 
-	win.setIcon('./content/youtube-icon.ico');
+	win.setIcon(path.join(__dirname, '/content/youtube-icon.ico'));
 	// win.webContents.openDevTools();
 
 	const config = {
@@ -31,10 +32,10 @@ const createWindow = () => {
 
 	checkInternetConnected(config)
 		.then(() => {
-			win.loadFile('index.html');
+			win.loadFile(path.join(__dirname, 'index.html'));
 		})
 		.catch(() => {
-			win.loadFile('./content/404.html');
+			win.loadFile(path.join(__dirname, '/content/404.html'));
 		});
 
 	// Dark mode code
