@@ -53,15 +53,25 @@ div.content-wrapper {
 }
 
 @media (prefers-color-scheme: dark) {
-	body {
+	body,
+	.modal-content,
+	.swal-modal,
+	.swal-title,
+	.swal-text {
 		background: #252525;
+		background-color: #252525;
 		color: white;
 	}
 }
 
 @media (prefers-color-scheme: light) {
-	body {
+	body,
+	.modal-content,
+	.swal-modal,
+	.swal-title,
+	.swal-text {
 		background: white;
+		background-color: white;
 		color: black;
 	}
 }
@@ -74,4 +84,122 @@ form {
 	display: grid;
 	height: 100%;
 	width: 100%;
+}
+
+/* The Modal (background) */
+.modal {
+	display: none; /* Hidden by default */
+	position: fixed; /* Stay in place */
+	z-index: 1; /* Sit on top */
+	left: 0;
+	top: 0;
+	padding-top: 3%;
+	width: 100%; /* Full width */
+	height: 100%; /* Full height */
+	overflow: auto; /* Enable scroll if needed */
+	background-color: rgb(0, 0, 0); /* Fallback color */
+	background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
+}
+
+/* The Close Button */
+.close {
+	color: black;
+	float: right;
+	font-size: 28px;
+	font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+	color: red;
+	text-decoration: none;
+	cursor: pointer;
+}
+
+/* Modal Header */
+.modal-header {
+	padding: 2px 16px;
+	background-color: #5cb85c;
+	background-clip: padding-box;
+	border-top-left-radius: 0.5rem;
+	border-top-right-radius: 0.5rem;
+	color: white;
+}
+
+/* Modal Body */
+.modal-body {
+	padding: 2px 16px;
+	height: calc(100% - 76px);
+	overflow: auto;
+}
+
+/* Modal Box */
+.modal-content {
+	position: relative;
+	margin: auto;
+	height: auto;
+	bottom: 0;
+	/* overflow: auto; */
+	border: 1px solid #888;
+	width: 80%;
+	height: 80%;
+	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+	animation-name: animatetop;
+	animation-duration: 0.4s;
+	background-clip: padding-box;
+	border-radius: 0.5rem;
+}
+
+/* Add Animation */
+@keyframes animatetop {
+	from {
+		top: -300px;
+		opacity: 0;
+	}
+	to {
+		top: 0;
+		opacity: 1;
+	}
+}
+
+.search-download-button {
+	display: block;
+	width: auto !important;
+	height: auto !important;
+	background: #2caa71;
+	padding: 10px 20px !important;
+	text-align: center;
+	border-radius: 5px;
+	color: white !important;
+	font-family: inherit !important;
+	font-weight: bold !important;
+	line-height: 25px;
+	cursor: pointer;
+}
+
+table {
+	margin-top: 10px;
+	margin-bottom: 10px;
+	font-family: arial, sans-serif;
+	width: 100%;
+	border-collapse: separate;
+	border: 1px solid #9b9b9b;
+	border-radius: 0.5rem;
+}
+
+td,
+th {
+	text-align: left;
+	padding: 8px;
+}
+
+th {
+	background-color: #494949;
+	color: #d4d4d4;
+	border-top: none;
+}
+
+tr:nth-child(even) {
+	background-color: #9b9b9b;
+	color: rgb(0, 0, 0);
 }

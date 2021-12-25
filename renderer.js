@@ -2,13 +2,17 @@ const { ipcRenderer } = require('electron');
 const remote = require('@electron/remote');
 const updater = remote.require('electron-simple-updater');
 
+const swal = require('sweetalert');
+
+// Downloading/file management modules
 const fs = require('fs');
 const cp = require('child_process');
 
+// Youtube modules
 const ytdl = require('ytdl-core');
 const ffmpeg = require('ffmpeg-static');
 const spotifyyt = require('spotify-to-yt');
-const swal = require('sweetalert');
+const search = require('yt-search');
 
 const videoRegex = /^\s*\<?(https?:\/\/)?((w{3}\.)|(m\.)|(music\.))?(youtube\.com\/(watch\?(\S+)?v\=)|youtu\.be\/)(?<urlkey>[\S]{11})\>?\s*/gim;
 const spotifyMusicRegex = /^\s*\<?(https?:\/\/)?(open\.spotify\.com\/track\/)(?<urlkey>[\S]{22})(\?si\=\S{0,22})?\>?\s*/gim;
@@ -18,6 +22,20 @@ document.getElementById('version').innerText = updater.version;
 attachUpdaterHandlers();
 updater.checkForUpdates();
 let downloadingUpdates = false;
+var modal = document.getElementById('myModal');
+var modalCloseButton = document.getElementsByClassName('close')[0];
+
+// When the user clicks on <span> (x), close the modal
+modalCloseButton.onclick = function () {
+	modal.style.display = 'none';
+};
+
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function (event) {
+	if (event.target == modal) {
+		modal.style.display = 'none';
+	}
+};
 
 // Handling updates
 function attachUpdaterHandlers() {
@@ -28,6 +46,8 @@ function attachUpdaterHandlers() {
 	function onUpdateAvailable() {
 		console.log('update available');
 		downloadingUpdates = true;
+		document.getElementById('download').disabled = true;
+		document.getElementById('download').style.cursor = 'not-allowed';
 		document.getElementById('version').innerText = 'Downloading new update...';
 		updater.downloadUpdate();
 	}
@@ -57,9 +77,56 @@ document.getElementById('download').addEventListener('click', async (event) => {
 
 	if (url.match(videoRegex) || url.match(spotifyMusicRegex)) {
 		document.getElementById('directory').click();
-	} else {
-		swal('Error!', 'Invalid url entered!', 'error');
+	} else if (url != '') {
 		document.getElementById('url').value = '';
+		search(url, async (err, res) => {
+			if (err) return swal('Error!', 'Encountered error while searching for a song, please try again', 'error');
+			if (res.videos.length === 0) return swal('No Results', 'No results found, please try another title', 'error');
+
+			let videos = res.videos;
+			htmlTableOutput = `<table id="result-table">
+            <thead>
+            <tr>
+            <th>ID</th>
+            <th>Thumbnail</th>
+            <th>Track Title</th>
+            <th>Views</th>
+            <th>Download</th>
+            </tr>
+            </thead>
+            <tbody>
+            `;
+
+			for (var i in videos) {
+				htmlTableOutput += `<tr>
+                <td>${parseInt(i) + 1}</td>
+                <td><img src="${videos[i].image}" alt="Video Thumbnail" height="60px"></td>
+                <td>${videos[i].title} (${videos[i].timestamp})</td>
+                <td>${String(videos[i].views)}</td>
+                <td><button class="search-download-button" id="download${i}">Download</button></td>
+                </tr>`;
+			}
+
+			htmlTableOutput += `</tbody></table>`;
+
+			document.getElementById('modal-body').innerHTML = htmlTableOutput;
+			document.getElementById('modal-header-content').innerHTML = `Search Results for: ${url}`;
+
+			async function searchDownloadButtonFunction() {
+				var id = parseInt(this.getAttribute('id').slice(8));
+				document.getElementById('url').value = videos[id].url;
+				modal.style.display = 'none';
+				document.getElementById('directory').click();
+			}
+
+			let resultElements = document.getElementsByClassName('search-download-button');
+			for (var i = 0; i < resultElements.length; i++) {
+				resultElements[i].addEventListener('click', searchDownloadButtonFunction, false);
+			}
+		});
+		modal.style.display = 'block';
+	} else {
+		swal('Error!', 'Search cannot be empty, enter a url or title to search', 'error');
 	}
 });
 

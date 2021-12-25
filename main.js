@@ -18,14 +18,14 @@ const createWindow = () => {
 	const win = new BrowserWindow({
 		width: 900,
 		height: 600,
-		minWidth: 700,
-		minHeight: 400,
+		minWidth: 900,
+		minHeight: 600,
 		autoHideMenuBar: true,
 		webPreferences: {
 			nodeIntegration: true,
 			contextIsolation: false,
-			enableRemoteModule: true,
-			devTools: true
+			enableRemoteModule: true
+			// devTools: false
 		}
 	});
 
