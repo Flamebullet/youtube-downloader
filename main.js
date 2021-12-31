@@ -3,7 +3,6 @@ const path = require('path');
 const checkInternetConnected = require('check-internet-connected');
 require('@electron/remote/main').initialize();
 const updater = require('electron-simple-updater');
-const open = require('open');
 
 if (require('electron-squirrel-startup')) return app.quit();
 
