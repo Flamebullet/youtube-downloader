@@ -79,6 +79,8 @@ document.getElementById('download').addEventListener('click', async (event) => {
 		document.getElementById('directory').click();
 	} else if (url != '') {
 		document.getElementById('url').value = '';
+		document.getElementById('modal-header-content').innerHTML = `Search Results for: ${url}`;
+		document.getElementById('modal-body').innerHTML = '<div class="loader"></div>';
 		search(url, async (err, res) => {
 			if (err) return swal('Error!', 'Encountered error while searching for a song, please try again', 'error');
 			if (res.videos.length === 0) return swal('No Results', 'No results found, please try another title', 'error');
@@ -89,7 +91,9 @@ document.getElementById('download').addEventListener('click', async (event) => {
             <tr>
             <th>ID</th>
             <th>Thumbnail</th>
-            <th>Track Title</th>
+            <th>Track Title (Timestamp)</th>
+            <th>Uploaded</th>
+            <th>Channel</th>
             <th>Views</th>
             <th>Download</th>
             </tr>
@@ -98,10 +102,24 @@ document.getElementById('download').addEventListener('click', async (event) => {
             `;
 
 			for (var i in videos) {
+				var videourl = '';
+				try {
+					videourl = (await ytdl.getInfo(videos[i].url)).player_response.streamingData.formats[0].url;
+				} catch (err) {
+					console.log(err);
+				}
+				console.log(videourl);
 				htmlTableOutput += `<tr>
                 <td>${parseInt(i) + 1}</td>
-                <td><img src="${videos[i].image}" alt="Video Thumbnail" height="60px"></td>
+                <td><video controls="true" class="embed-responsive-item" width="177" height="100" poster="${videos[i].thumbnail}">
+                <source
+                    src="${videourl}"
+                    type="video/mp4"
+                />
+                </video></td>
                 <td>${videos[i].title} (${videos[i].timestamp})</td>
+                <td>${videos[i].ago}</td>
+                <td>${videos[i].author.name}</td>
                 <td>${String(videos[i].views)}</td>
                 <td><button class="search-download-button" id="download${i}">Download</button></td>
                 </tr>`;
