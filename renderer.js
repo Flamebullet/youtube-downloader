@@ -23,11 +23,19 @@ attachUpdaterHandlers();
 updater.checkForUpdates();
 let downloadingUpdates = false;
 var modal = document.getElementById('myModal');
-var modalCloseButton = document.getElementsByClassName('close')[0];
+var previewModal = document.getElementById('videoModal');
+var modalCloseButton = document.getElementById('close');
+var previewModalCloseButton = document.getElementById('video-close');
 
 // When the user clicks on <span> (x), close the modal
 modalCloseButton.onclick = function () {
 	modal.style.display = 'none';
+};
+
+// When the user clicks on <span> (x), close the modal
+previewModalCloseButton.onclick = function () {
+	document.getElementById('video-modal-body').innerHTML = '<div class="loader"></div>';
+	previewModal.style.display = 'none';
 };
 
 // When the user clicks anywhere outside of the modal, close it
@@ -37,6 +45,18 @@ window.onclick = function (event) {
 	}
 };
 
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function (event) {
+	if (event.target == previewModal) {
+		document.getElementById('video-modal-body').innerHTML = '<div class="loader"></div>';
+		previewModal.style.display = 'none';
+	}
+};
+
+window.addEventListener('resize', () => {
+	document.getElementById('modal-body').style.setProperty('height', 'calc(100% - ' + document.getElementById('modal-header-block').clientHeight + 'px - 4px)');
+	document.getElementById('video-modal-body').style.setProperty('height', 'calc(100% - ' + document.getElementById('video-modal-header-block').clientHeight + 'px - 4px)');
+});
 // Handling updates
 function attachUpdaterHandlers() {
 	updater.on('update-available', onUpdateAvailable);
@@ -80,11 +100,13 @@ document.getElementById('download').addEventListener('click', async (event) => {
 	} else if (url != '') {
 		document.getElementById('url').value = '';
 		document.getElementById('modal-header-content').innerHTML = `Search Results for: ${url}`;
+		document.getElementById('modal-body').style.height = `calc(100% - ${document.getElementById('modal-header-content').style.height}) !important`;
 		document.getElementById('modal-body').innerHTML = '<div class="loader"></div>';
 		search(url, async (err, res) => {
 			if (err) return swal('Error!', 'Encountered error while searching for a song, please try again', 'error');
 			if (res.videos.length === 0) return swal('No Results', 'No results found, please try another title', 'error');
 
+			// Create table to show list of available videos
 			let videos = res.videos;
 			htmlTableOutput = `<table id="result-table">
             <thead>
@@ -102,22 +124,10 @@ document.getElementById('download').addEventListener('click', async (event) => {
             `;
 
 			for (var i in videos) {
-				var videourl = '';
-				try {
-					videourl = (await ytdl.getInfo(videos[i].url)).player_response.streamingData.formats[0].url;
-				} catch (err) {
-					console.log(err);
-				}
-				console.log(videourl);
 				htmlTableOutput += `<tr>
                 <td>${parseInt(i) + 1}</td>
-                <td><video controls="true" class="embed-responsive-item" width="177" height="100" poster="${videos[i].thumbnail}">
-                <source
-                    src="${videourl}"
-                    type="video/mp4"
-                />
-                </video></td>
-                <td>${videos[i].title} (${videos[i].timestamp})</td>
+                <td><img title="preview video" class="show-preview" id="preview${i}" src="${videos[i].thumbnail}" alt="${videos[i].title}" width="177" height="100" style="cursor: pointer;"></td>
+                <td class="show-preview" id="preview${i}" style="cursor: pointer;" title="preview video">${videos[i].title} (${videos[i].timestamp})</td>
                 <td>${videos[i].ago}</td>
                 <td>${videos[i].author.name}</td>
                 <td>${String(videos[i].views)}</td>
@@ -127,9 +137,10 @@ document.getElementById('download').addEventListener('click', async (event) => {
 
 			htmlTableOutput += `</tbody></table>`;
 
+			// Update modal content with list of searched videos
 			document.getElementById('modal-body').innerHTML = htmlTableOutput;
-			document.getElementById('modal-header-content').innerHTML = `Search Results for: ${url}`;
 
+			// function to select video associated to download button
 			async function searchDownloadButtonFunction() {
 				var id = parseInt(this.getAttribute('id').slice(8));
 				document.getElementById('url').value = videos[id].url;
@@ -137,12 +148,47 @@ document.getElementById('download').addEventListener('click', async (event) => {
 				document.getElementById('directory').click();
 			}
 
-			let resultElements = document.getElementsByClassName('search-download-button');
+			// function to show another modal with preview of selected video
+			async function showVideoPreview() {
+				var id = parseInt(this.getAttribute('id').slice(7));
+				previewModal.style.display = 'block';
+
+				// Display spinner while loading
+				document.getElementById('video-modal-header-content').innerHTML = `Previewing: ${videos[id].title}`;
+				document.getElementById('video-modal-body').style.setProperty('height', 'calc(100% - ' + document.getElementById('video-modal-header-block').clientHeight + 'px - 4px)');
+				document.getElementById('video-modal-body').innerHTML = '<div class="loader"></div>';
+
+				var videourl = '';
+				try {
+					const video = await ytdl.getInfo(videos[id].url);
+					videourl = video.player_response.streamingData.formats[video.player_response.streamingData.formats.length - 1].url;
+				} catch (err) {
+					console.log(err);
+				}
+				document.getElementById('video-modal-body').innerHTML = `
+                    <video controls="true" class="embed-responsive-item" height="98%" width="100%" aspect-ratio="16/9" poster="${videos[id].thumbnail}">
+                        <source
+                            src="${videourl}"
+                            type="video/mp4"
+                        />
+                    </video>
+                `;
+			}
+
+			// Add listeners to listen for clicks on title or thumbnail
+			let resultElements = document.getElementsByClassName('show-preview');
+			for (var i = 0; i < resultElements.length; i++) {
+				resultElements[i].addEventListener('click', showVideoPreview, false);
+			}
+
+			// Add listeners to listen for clicks on download buttons
+			resultElements = document.getElementsByClassName('search-download-button');
 			for (var i = 0; i < resultElements.length; i++) {
 				resultElements[i].addEventListener('click', searchDownloadButtonFunction, false);
 			}
 		});
 		modal.style.display = 'block';
+		document.getElementById('modal-body').style.setProperty('height', 'calc(100% - ' + document.getElementById('modal-header-block').clientHeight + 'px - 4px)');
 	} else {
 		swal('Error!', 'Search cannot be empty, enter a url or title to search', 'error');
 	}
