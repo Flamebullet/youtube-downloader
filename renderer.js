@@ -42,12 +42,7 @@ previewModalCloseButton.onclick = function () {
 window.onclick = function (event) {
 	if (event.target == modal) {
 		modal.style.display = 'none';
-	}
-};
-
-// When the user clicks anywhere outside of the modal, close it
-window.onclick = function (event) {
-	if (event.target == previewModal) {
+	} else if (event.target == previewModal) {
 		document.getElementById('video-modal-body').innerHTML = '<div class="loader"></div>';
 		previewModal.style.display = 'none';
 	}

@@ -16,17 +16,17 @@ updater.init({
 const createWindow = () => {
 	// Application window settings
 	const win = new BrowserWindow({
-		width: 900,
-		height: 600,
-		minWidth: 900,
-		minHeight: 600,
+		width: 1100,
+		height: 650,
+		minWidth: 1100,
+		minHeight: 650,
 		autoHideMenuBar: true,
 		sandbox: true,
 		webPreferences: {
 			nodeIntegration: true,
 			contextIsolation: false,
 			enableRemoteModule: true,
-			devTools: true
+			devTools: false
 		}
 	});
 
