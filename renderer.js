@@ -49,8 +49,12 @@ window.onclick = function (event) {
 };
 
 window.addEventListener('resize', () => {
-	document.getElementById('modal-body').style.setProperty('height', 'calc(100% - ' + document.getElementById('modal-header-block').clientHeight + 'px - 4px)');
-	document.getElementById('video-modal-body').style.setProperty('height', 'calc(100% - ' + document.getElementById('video-modal-header-block').clientHeight + 'px - 4px)');
+	document
+		.getElementById('modal-body')
+		.style.setProperty('height', 'calc(100% - ' + document.getElementById('modal-header-block').clientHeight + 'px - 4px)');
+	document
+		.getElementById('video-modal-body')
+		.style.setProperty('height', 'calc(100% - ' + document.getElementById('video-modal-header-block').clientHeight + 'px - 4px)');
 });
 // Handling updates
 function attachUpdaterHandlers() {
@@ -121,7 +125,9 @@ document.getElementById('download').addEventListener('click', async (event) => {
 			for (var i in videos) {
 				htmlTableOutput += `<tr>
                 <td>${parseInt(i) + 1}</td>
-                <td><img title="preview video" class="show-preview" id="preview${i}" src="${videos[i].thumbnail}" alt="${videos[i].title}" width="177" height="100" style="cursor: pointer;"></td>
+                <td><img title="preview video" class="show-preview" id="preview${i}" src="${videos[i].thumbnail}" alt="${
+					videos[i].title
+				}" width="177" height="100" style="cursor: pointer;"></td>
                 <td class="show-preview" id="preview${i}" style="cursor: pointer;" title="preview video">${videos[i].title} (${videos[i].timestamp})</td>
                 <td>${videos[i].ago}</td>
                 <td>${videos[i].author.name}</td>
@@ -150,7 +156,9 @@ document.getElementById('download').addEventListener('click', async (event) => {
 
 				// Display spinner while loading
 				document.getElementById('video-modal-header-content').innerHTML = `Previewing: ${videos[id].title}`;
-				document.getElementById('video-modal-body').style.setProperty('height', 'calc(100% - ' + document.getElementById('video-modal-header-block').clientHeight + 'px - 4px)');
+				document
+					.getElementById('video-modal-body')
+					.style.setProperty('height', 'calc(100% - ' + document.getElementById('video-modal-header-block').clientHeight + 'px - 4px)');
 				document.getElementById('video-modal-body').innerHTML = '<div class="loader"></div>';
 
 				var videourl = '';
@@ -183,7 +191,9 @@ document.getElementById('download').addEventListener('click', async (event) => {
 			}
 		});
 		modal.style.display = 'block';
-		document.getElementById('modal-body').style.setProperty('height', 'calc(100% - ' + document.getElementById('modal-header-block').clientHeight + 'px - 4px)');
+		document
+			.getElementById('modal-body')
+			.style.setProperty('height', 'calc(100% - ' + document.getElementById('modal-header-block').clientHeight + 'px - 4px)');
 	} else {
 		swal('Error!', 'Search cannot be empty, enter a url or title to search', 'error');
 	}
@@ -352,8 +362,45 @@ document.getElementById('directory').addEventListener(
 			video.pipe(ffmpegProcess.stdio[5]);
 		} else if (audioElement) {
 			if (!progressbarHandle) progressbarHandle = setInterval(showProgress, progressbarInterval);
-			audio.pipe(fs.createWriteStream(`${filePath}\\${videoName.videoDetails.title.replaceAll(/\*|\.|\"|\/|\\|\[|\]|\:|\;|\||\,/gi, '')}.mp4`));
-			audio.on('end', () => {
+			// output audio as mp3 file
+			const ffmpegProcess = cp.spawn(
+				ffmpeg,
+				[
+					// Remove ffmpeg's console spamming
+					'-loglevel',
+					'8',
+					'-hide_banner',
+					// Redirect/Enable progress messages
+					'-progress',
+					'pipe:3',
+					// Set inputs
+					'-i',
+					'pipe:4',
+					// Map audio & video from streams
+					'-map',
+					'0:a',
+					'-codec:a',
+					'libmp3lame',
+					'-qscale:a',
+					'0',
+					'-y',
+					`${filePath}\\${videoName.videoDetails.title.replaceAll(/\*|\.|\"|\/|\\|\[|\]|\:|\;|\||\,/gi, '')}.mp3`
+				],
+				{
+					windowsHide: true,
+					stdio: [
+						/* Standard: stdin, stdout, stderr */
+						'inherit',
+						'inherit',
+						'inherit',
+						/* Custom: pipe:3, pipe:4, pipe:5 */
+						'pipe',
+						'pipe'
+					]
+				}
+			);
+
+			ffmpegProcess.on('close', () => {
 				clearInterval(progressbarHandle);
 				document.getElementById('download-progress').innerText = '';
 				document.getElementById('url').value = '';
@@ -366,6 +413,8 @@ document.getElementById('directory').addEventListener(
 				swal('Video Downloaded!', 'Video has successfully been downloaded and saved to selected folder', 'success');
 				return;
 			});
+
+			audio.pipe(ffmpegProcess.stdio[4]);
 		} else if (videoElement) {
 			if (!progressbarHandle) progressbarHandle = setInterval(showProgress, progressbarInterval);
 			video.pipe(fs.createWriteStream(`${filePath}\\${videoName.videoDetails.title.replaceAll(/\*|\.|\"|\/|\\|\[|\]|\:|\;|\||\,/gi, '')}.mp4`));
