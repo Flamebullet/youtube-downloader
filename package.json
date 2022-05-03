@@ -1,6 +1,6 @@
 {
 	"name": "youtube-downloader",
-	"version": "1.0.10",
+	"version": "1.0.11",
 	"description": "Application to download YouTube Videos",
 	"main": "main.js",
 	"scripts": {
@@ -70,11 +70,11 @@
 		"electron-simple-updater": "^2.0.11",
 		"electron-squirrel-startup": "^1.0.0",
 		"env-cmd": "^10.1.0",
-		"ffmpeg-static": "^4.4.0",
+		"ffmpeg-static": "^5.0.0",
 		"fs": "^0.0.1-security",
 		"spotify-to-yt": "^1.1.1",
 		"sweetalert": "^2.1.2",
-		"yt-search": "^2.10.2",
-		"ytdl-core": "^4.9.2"
+		"yt-search": "^2.10.3",
+		"ytdl-core": "^4.11.0"
 	}
 }
