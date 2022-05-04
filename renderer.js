@@ -67,14 +67,14 @@ function attachUpdaterHandlers() {
 		downloadingUpdates = true;
 		document.getElementById('download').disabled = true;
 		document.getElementById('download').style.cursor = 'not-allowed';
-		document.getElementById('version').innerText = 'Downloading new update...';
+		document.getElementById('version').innerText = 'Updating...';
 		updater.downloadUpdate();
 	}
 
 	function onUpdateDownloading() {
 		console.log('update downloading');
 		downloadingUpdates = true;
-		document.getElementById('version').innerText = 'Downloading new update...';
+		document.getElementById('version').innerText = 'Updating...';
 	}
 
 	function onUpdateDownloaded() {
@@ -199,242 +199,243 @@ document.getElementById('download').addEventListener('click', async (event) => {
 	}
 });
 
-document.getElementById('directory').addEventListener(
-	'change',
-	async (event) => {
-		if (document.getElementById('directory').files.length == 0) {
-			return swal('Error!', 'Download path must be selected!', 'error');
-		}
+document.getElementById('directory').addEventListener('change', async (event) => {
+	if (document.getElementById('directory').files.length == 0) {
+		return swal('Error!', 'Download path must be selected!', 'error');
+	}
 
-		let files = event.target.files;
+	let files = event.target.files;
 
-		let filePathArray = files[0].path.split('\\');
-		filePathArray.pop();
-		let filePath = filePathArray.join('\\');
-		const url = document.getElementById('url').value;
-		const audioElement = document.getElementById('audio').checked;
-		const videoElement = document.getElementById('video').checked;
+	let filePathArray = files[0].path.split('\\');
+	filePathArray.pop();
+	let filePath = filePathArray.join('\\');
+	const url = document.getElementById('url').value;
+	const audioElement = document.getElementById('audio').checked;
+	const videoElement = document.getElementById('video').checked;
 
-		var fullYoutubeURL = '';
+	var fullYoutubeURL = '';
 
-		if (url.match(videoRegex)) {
-			var urlkey = videoRegex.exec(url);
-			var youtubeBase = 'https://www.youtube.com/watch?v=';
-			fullYoutubeURL = youtubeBase.concat(urlkey.groups.urlkey);
-		}
+	if (url.match(videoRegex)) {
+		var urlkey = videoRegex.exec(url);
+		var youtubeBase = 'https://www.youtube.com/watch?v=';
+		fullYoutubeURL = youtubeBase.concat(urlkey.groups.urlkey);
+	}
 
-		if (url.match(spotifyMusicRegex)) {
-			var urlkey = spotifyMusicRegex.exec(url);
-			var music = [urlkey.groups.urlkey];
+	if (url.match(spotifyMusicRegex)) {
+		var urlkey = spotifyMusicRegex.exec(url);
+		var music = [urlkey.groups.urlkey];
 
-			await spotifyyt
-				.trackGet(`https://open.spotify.com/track/${music}`)
-				.then(async (result) => {
-					fullYoutubeURL = result.url;
-				})
-				.catch(() => {
-					return swal('Error!', 'Invalid Spotify URL entered!', 'error');
-				});
-		}
-
-		document.getElementById('url').disabled = true;
-		document.getElementById('download').disabled = true;
-		document.getElementById('url').style.cursor = 'not-allowed';
-		document.getElementById('download').style.cursor = 'not-allowed';
-		swal('Download Started!', 'Do not close window while download is in progress', 'info');
-		// TODO Download video to directory
-		const tracker = {
-			start: Date.now(),
-			audio: { downloaded: 0, total: 0 },
-			video: { downloaded: 0, total: 0 }
-		};
-		const videoName = await ytdl.getInfo(fullYoutubeURL);
-
-		let audio, video;
-		if (audioElement) {
-			audio = ytdl(fullYoutubeURL, { filter: 'audioonly', quality: 'highestaudio' }).on('progress', (_, downloaded, total) => {
-				tracker.audio = { downloaded, total };
+		await spotifyyt
+			.trackGet(`https://open.spotify.com/track/${music}`)
+			.then(async (result) => {
+				fullYoutubeURL = result.url;
+			})
+			.catch(() => {
+				return swal('Error!', 'Invalid Spotify URL entered!', 'error');
 			});
-		}
+	}
 
-		if (videoElement) {
-			video = ytdl(fullYoutubeURL, { filter: 'videoonly', quality: 'highestvideo' }).on('progress', (_, downloaded, total) => {
-				tracker.video = { downloaded, total };
-			});
-		}
+	document.getElementById('url').disabled = true;
+	document.getElementById('download').disabled = true;
+	document.getElementById('url').style.cursor = 'not-allowed';
+	document.getElementById('download').style.cursor = 'not-allowed';
+	swal('Download Started!', 'Do not close window while download is in progress', 'info');
 
-		let progressbarHandle = null;
-		const progressbarInterval = 1000;
-		const showProgress = () => {
-			let output = 'Download Progress:\n';
-			const toMB = (i) => (i / 1024 / 1024).toFixed(2);
+	const tracker = {
+		start: Date.now(),
+		audio: { downloaded: 0, total: Infinity },
+		video: { downloaded: 0, total: Infinity },
+		merged: { frame: 0, speed: '0x', fps: 0 }
+	};
 
-			var percentage = ((tracker.audio.downloaded / tracker.audio.total) * 100).toFixed(2);
-			if (isNaN(percentage)) percentage = 0;
-			output += `Audio | ${percentage}% processed `;
-			output += `(${toMB(tracker.audio.downloaded)}MB of ${toMB(tracker.audio.total)}MB).${' '.repeat(10)}\n`;
+	const videoName = await ytdl.getInfo(fullYoutubeURL);
 
-			var percentage = ((tracker.video.downloaded / tracker.video.total) * 100).toFixed(2);
-			if (isNaN(percentage)) percentage = 0;
-			output += `Video | ${percentage}% processed `;
-			output += `(${toMB(tracker.video.downloaded)}MB of ${toMB(tracker.video.total)}MB).${' '.repeat(10)}\n`;
+	let audio, video;
+	if (audioElement) {
+		audio = ytdl(fullYoutubeURL, {
+			quality: 'highestaudio'
+		}).on('progress', (_, downloaded, total) => {
+			tracker.audio = { downloaded, total };
+		});
+	}
 
-			if (tracker.merged) {
-				output += `Merged | processing frame ${tracker.merged.frame} `;
-				output += `(at ${tracker.merged.fps} fps => ${tracker.merged.speed}).${' '.repeat(10)}\n`;
+	if (videoElement) {
+		video = ytdl(fullYoutubeURL, {
+			quality: 'highestvideo'
+		}).on('progress', (_, downloaded, total) => {
+			tracker.video = { downloaded, total };
+		});
+	}
+
+	// Prepare the progress bar
+	let progressbarHandle = null;
+	const progressbarInterval = 1000;
+	const showProgress = () => {
+		let output = 'Download Progress:\n';
+		const toMB = (i) => (i / 1024 / 1024).toFixed(2);
+
+		output += `Audio  | ${((tracker.audio.downloaded / tracker.audio.total) * 100).toFixed(2)}% processed `;
+		output += `(${toMB(tracker.audio.downloaded)}MB of ${toMB(tracker.audio.total)}MB).${' '.repeat(10)}\n`;
+
+		output += `Video  | ${((tracker.video.downloaded / tracker.video.total) * 100).toFixed(2)}% processed `;
+		output += `(${toMB(tracker.video.downloaded)}MB of ${toMB(tracker.video.total)}MB).${' '.repeat(10)}\n`;
+
+		output += `Merged | processing frame ${tracker.merged.frame} `;
+		output += `(at ${tracker.merged.fps} fps => ${tracker.merged.speed}).${' '.repeat(10)}\n`;
+
+		output += `Running for: ${((Date.now() - tracker.start) / 1000 / 60).toFixed(2)} Minutes.`;
+
+		document.getElementById('download-progress').innerText = output;
+	};
+
+	if (audioElement && videoElement) {
+		console.log(videoName);
+		// Start the ffmpeg child process
+		const ffmpegProcess = cp.spawn(
+			ffmpeg,
+			[
+				// Remove ffmpeg's console spamming
+				'-loglevel',
+				'8',
+				'-hide_banner',
+				// Redirect/Enable progress messages
+				'-progress',
+				'pipe:3',
+				// Set inputs
+				'-i',
+				'pipe:4',
+				'-i',
+				'pipe:5',
+				// Map audio & video from streams
+				'-map',
+				'0:a',
+				'-map',
+				'1:v',
+				// Keep encoding
+				'-c:v',
+				'copy',
+				// Define output file
+				`${filePath}\\${videoName.videoDetails.title.replaceAll(/\*|\.|\?|\"|\/|\\|\:|\||\<|\>/gi, '')}.mp4`
+			],
+			{
+				windowsHide: true,
+				stdio: [
+					/* Standard: stdin, stdout, stderr */
+					'inherit',
+					'inherit',
+					'inherit',
+					/* Custom: pipe:3, pipe:4, pipe:5 */
+					'pipe',
+					'pipe',
+					'pipe'
+				]
 			}
+		);
 
-			output += `Uptime: ${((Date.now() - tracker.start) / 1000 / 60).toFixed(2)} Minutes.`;
+		ffmpegProcess.on('close', () => {
+			clearInterval(progressbarHandle);
+			document.getElementById('download-progress').innerText = '';
+			document.getElementById('url').value = '';
+			document.getElementById('url').disabled = false;
+			document.getElementById('download').disabled = false;
+			document.getElementById('url').style.cursor = 'text';
+			document.getElementById('download').style.cursor = 'pointer';
+			document.getElementById('directory').value = '';
 
-			document.getElementById('download-progress').innerText = output;
-		};
+			swal('Video Downloaded!', 'Video has successfully been downloaded and saved to selected folder', 'success');
+			return;
+		});
 
-		if (audioElement && videoElement) {
-			// Start the ffmpeg child process
-			const ffmpegProcess = cp.spawn(
-				ffmpeg,
-				[
-					// Remove ffmpeg's console spamming
-					'-loglevel',
-					'8',
-					'-hide_banner',
-					// Redirect/Enable progress messages
-					'-progress',
-					'pipe:3',
-					// Set inputs
-					'-i',
-					'pipe:4',
-					'-i',
-					'pipe:5',
-					// Map audio & video from streams
-					'-map',
-					'0:a',
-					'-map',
-					'1:v',
-					// Keep encoding
-					'-c:v',
-					'copy',
-					// Define output file
-					'-y',
-					`${filePath}\\${videoName.videoDetails.title.replaceAll(/\*|\.|\"|\/|\\|\[|\]|\:|\;|\||\,/gi, '')}.mp4`
-				],
-				{
-					windowsHide: true,
-					stdio: [
-						/* Standard: stdin, stdout, stderr */
-						'inherit',
-						'inherit',
-						'inherit',
-						/* Custom: pipe:3, pipe:4, pipe:5 */
-						'pipe',
-						'pipe',
-						'pipe'
-					]
-				}
-			);
-			ffmpegProcess.on('close', () => {
-				clearInterval(progressbarHandle);
-				document.getElementById('download-progress').innerText = '';
-				document.getElementById('url').value = '';
-				document.getElementById('url').disabled = false;
-				document.getElementById('download').disabled = false;
-				document.getElementById('url').style.cursor = 'text';
-				document.getElementById('download').style.cursor = 'pointer';
-				document.getElementById('directory').value = '';
-
-				swal('Video Downloaded!', 'Video has successfully been downloaded and saved to selected folder', 'success');
-				return;
-			});
-
-			ffmpegProcess.stdio[3].on('data', (chunk) => {
-				// Start the progress bar
-				if (!progressbarHandle) progressbarHandle = setInterval(showProgress, progressbarInterval);
-				// Parse the param=value list returned by ffmpeg
-				const lines = chunk.toString().trim().split('\n');
-				const args = {};
-				for (const l of lines) {
-					const [key, value] = l.split('=');
-					args[key.trim()] = value.trim();
-				}
-				tracker.merged = args;
-			});
-			audio.pipe(ffmpegProcess.stdio[4]);
-			video.pipe(ffmpegProcess.stdio[5]);
-		} else if (audioElement) {
+		// Link streams
+		// FFmpeg creates the transformer streams and we just have to insert / read data
+		ffmpegProcess.stdio[3].on('data', (chunk) => {
+			// Start the progress bar
 			if (!progressbarHandle) progressbarHandle = setInterval(showProgress, progressbarInterval);
-			// output audio as mp3 file
-			const ffmpegProcess = cp.spawn(
-				ffmpeg,
-				[
-					// Remove ffmpeg's console spamming
-					'-loglevel',
-					'8',
-					'-hide_banner',
-					// Redirect/Enable progress messages
-					'-progress',
-					'pipe:3',
-					// Set inputs
-					'-i',
-					'pipe:4',
-					// Map audio & video from streams
-					'-map',
-					'0:a',
-					'-codec:a',
-					'libmp3lame',
-					'-qscale:a',
-					'0',
-					'-y',
-					`${filePath}\\${videoName.videoDetails.title.replaceAll(/\*|\.|\"|\/|\\|\[|\]|\:|\;|\||\,/gi, '')}.mp3`
-				],
-				{
-					windowsHide: true,
-					stdio: [
-						/* Standard: stdin, stdout, stderr */
-						'inherit',
-						'inherit',
-						'inherit',
-						/* Custom: pipe:3, pipe:4, pipe:5 */
-						'pipe',
-						'pipe'
-					]
-				}
-			);
+			// Parse the param=value list returned by ffmpeg
+			const lines = chunk.toString().trim().split('\n');
+			const args = {};
+			for (const l of lines) {
+				const [key, value] = l.split('=');
+				args[key.trim()] = value.trim();
+			}
+			tracker.merged = args;
+		});
 
-			ffmpegProcess.on('close', () => {
-				clearInterval(progressbarHandle);
-				document.getElementById('download-progress').innerText = '';
-				document.getElementById('url').value = '';
-				document.getElementById('url').disabled = false;
-				document.getElementById('download').disabled = false;
-				document.getElementById('url').style.cursor = 'text';
-				document.getElementById('download').style.cursor = 'pointer';
-				document.getElementById('directory').value = '';
+		audio.pipe(ffmpegProcess.stdio[4]);
+		video.pipe(ffmpegProcess.stdio[5]);
+	} else if (audioElement) {
+		if (!progressbarHandle) progressbarHandle = setInterval(showProgress, progressbarInterval);
+		// output audio as mp3 file
+		const ffmpegProcess = cp.spawn(
+			ffmpeg,
+			[
+				// Remove ffmpeg's console spamming
+				'-loglevel',
+				'8',
+				'-hide_banner',
+				// Redirect/Enable progress messages
+				'-progress',
+				'pipe:3',
+				// Set inputs
+				'-i',
+				'pipe:4',
+				// Map audio & video from streams
+				'-map',
+				'0:a',
+				'-codec:a',
+				'libmp3lame',
+				'-qscale:a',
+				'0',
+				'-y',
+				`${filePath}\\${videoName.videoDetails.title.replaceAll(/\*|\.|\?|\"|\/|\\|\:|\||\<|\>/gi, '')}.mp3`
+			],
+			{
+				windowsHide: true,
+				stdio: [
+					/* Standard: stdin, stdout, stderr */
+					'inherit',
+					'inherit',
+					'inherit',
+					/* Custom: pipe:3, pipe:4, pipe:5 */
+					'pipe',
+					'pipe'
+				]
+			}
+		);
 
-				swal('Video Downloaded!', 'Video has successfully been downloaded and saved to selected folder', 'success');
-				return;
-			});
+		ffmpegProcess.on('close', () => {
+			clearInterval(progressbarHandle);
+			document.getElementById('download-progress').innerText = '';
+			document.getElementById('url').value = '';
+			document.getElementById('url').disabled = false;
+			document.getElementById('download').disabled = false;
+			document.getElementById('url').style.cursor = 'text';
+			document.getElementById('download').style.cursor = 'pointer';
+			document.getElementById('directory').value = '';
 
-			audio.pipe(ffmpegProcess.stdio[4]);
-		} else if (videoElement) {
-			if (!progressbarHandle) progressbarHandle = setInterval(showProgress, progressbarInterval);
-			video.pipe(fs.createWriteStream(`${filePath}\\${videoName.videoDetails.title.replaceAll(/\*|\.|\"|\/|\\|\[|\]|\:|\;|\||\,/gi, '')}.mp4`));
-			video.on('end', () => {
-				clearInterval(progressbarHandle);
-				document.getElementById('download-progress').innerText = '';
-				document.getElementById('url').value = '';
-				document.getElementById('url').disabled = false;
-				document.getElementById('download').disabled = false;
-				document.getElementById('url').style.cursor = 'text';
-				document.getElementById('download').style.cursor = 'pointer';
-				document.getElementById('directory').value = '';
+			swal('Video Downloaded!', 'Video has successfully been downloaded and saved to selected folder', 'success');
+			return;
+		});
 
-				swal('Video Downloaded!', 'Video has successfully been downloaded and saved to selected folder', 'success');
-				return;
-			});
-		}
-	},
-	false
-);
+		audio.pipe(ffmpegProcess.stdio[4]);
+	} else if (videoElement) {
+		if (!progressbarHandle) progressbarHandle = setInterval(showProgress, progressbarInterval);
+		video.pipe(fs.createWriteStream(`${filePath}\\${videoName.videoDetails.title.replaceAll(/\*|\.|\?|\"|\/|\\|\:|\||\<|\>/gi, '')}.mp4`));
+		video.on('end', () => {
+			clearInterval(progressbarHandle);
+			document.getElementById('download-progress').innerText = '';
+			document.getElementById('url').value = '';
+			document.getElementById('url').disabled = false;
+			document.getElementById('download').disabled = false;
+			document.getElementById('url').style.cursor = 'text';
+			document.getElementById('download').style.cursor = 'pointer';
+			document.getElementById('directory').value = '';
+
+			swal('Video Downloaded!', 'Video has successfully been downloaded and saved to selected folder', 'success');
+			return;
+		});
+	}
+});
 
 document.getElementById('toggle-dark-mode').addEventListener('click', async () => {
 	// const isDarkMode = await window.darkMode.toggle();

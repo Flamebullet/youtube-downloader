@@ -4,7 +4,7 @@ const checkInternetConnected = require('check-internet-connected');
 require('@electron/remote/main').initialize();
 const updater = require('electron-simple-updater');
 
-if (require('electron-squirrel-startup')) return app.quit();
+if (require('electron-squirrel-startup')) app.quit();
 
 updater.init({
 	checkUpdateOnStart: false,
