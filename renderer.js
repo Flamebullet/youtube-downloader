@@ -235,12 +235,6 @@ document.getElementById('directory').addEventListener('change', async (event) =>
 			});
 	}
 
-	document.getElementById('url').disabled = true;
-	document.getElementById('download').disabled = true;
-	document.getElementById('url').style.cursor = 'not-allowed';
-	document.getElementById('download').style.cursor = 'not-allowed';
-	swal('Download Started!', 'Do not close window while download is in progress', 'info');
-
 	const tracker = {
 		start: Date.now(),
 		audio: { downloaded: 0, total: Infinity },
@@ -248,7 +242,28 @@ document.getElementById('directory').addEventListener('change', async (event) =>
 		merged: { frame: 0, speed: '0x', fps: 0 }
 	};
 
-	const videoName = await ytdl.getInfo(fullYoutubeURL);
+	const videoName = await ytdl.getInfo(fullYoutubeURL).catch((err) => {
+		swal(`${err}`, 'Unable to get information for this video, try again or try another video', 'error');
+	});
+
+	if (!videoName) return;
+	if (videoName.videoDetails.isLiveContent) {
+		proceedLive = await swal({
+			title: 'Warning!',
+			text: 'This video is live proceeding is not recommended, if you wish to proceed, click "Proceed" and leave window open until stream ends',
+			icon: 'warning',
+			buttons: {
+				cancel: true,
+				proceed: {
+					text: 'Proceed',
+					value: 'proceed',
+					className: 'swal-button--danger'
+				}
+			}
+		});
+
+		if (proceedLive == null) return (document.getElementById('directory').value = '');
+	}
 
 	let audio, video;
 	if (audioElement) {
@@ -266,6 +281,12 @@ document.getElementById('directory').addEventListener('change', async (event) =>
 			tracker.video = { downloaded, total };
 		});
 	}
+
+	document.getElementById('url').disabled = true;
+	document.getElementById('download').disabled = true;
+	document.getElementById('url').style.cursor = 'not-allowed';
+	document.getElementById('download').style.cursor = 'not-allowed';
+	swal('Download Started!', 'Do not close window while download is in progress', 'info');
 
 	// Prepare the progress bar
 	let progressbarHandle = null;
@@ -289,7 +310,6 @@ document.getElementById('directory').addEventListener('change', async (event) =>
 	};
 
 	if (audioElement && videoElement) {
-		console.log(videoName);
 		// Start the ffmpeg child process
 		const ffmpegProcess = cp.spawn(
 			ffmpeg,
