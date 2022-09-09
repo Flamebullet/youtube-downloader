@@ -56,6 +56,7 @@ window.addEventListener('resize', () => {
 		.getElementById('video-modal-body')
 		.style.setProperty('height', 'calc(100% - ' + document.getElementById('video-modal-header-block').clientHeight + 'px - 4px)');
 });
+
 // Handling updates
 function attachUpdaterHandlers() {
 	updater.on('update-available', onUpdateAvailable);
@@ -250,7 +251,7 @@ document.getElementById('directory').addEventListener('change', async (event) =>
 	if (videoName.videoDetails.isLiveContent) {
 		proceedLive = await swal({
 			title: 'Warning!',
-			text: 'This video is live proceeding is not recommended, if you wish to proceed, click "Proceed" and leave window open until stream ends',
+			text: 'This video is live! Proceeding is not recommended, if you wish to proceed, click "Proceed" and leave window open until stream ends',
 			icon: 'warning',
 			buttons: {
 				cancel: true,
@@ -268,7 +269,9 @@ document.getElementById('directory').addEventListener('change', async (event) =>
 	let audio, video;
 	if (audioElement) {
 		audio = ytdl(fullYoutubeURL, {
-			quality: 'highestaudio'
+			filter: 'audioonly',
+			quality: 'highestaudio',
+			encoderArgs: ['-af', "firequalizer=gain_entry='entry(0,20);entry(250,14);entry(1000,7);entry(4000,0);entry(16000,4)'", 'dynaudnorm=f=200']
 		}).on('progress', (_, downloaded, total) => {
 			tracker.audio = { downloaded, total };
 		});
@@ -276,6 +279,7 @@ document.getElementById('directory').addEventListener('change', async (event) =>
 
 	if (videoElement) {
 		video = ytdl(fullYoutubeURL, {
+			filter: 'videoonly',
 			quality: 'highestvideo'
 		}).on('progress', (_, downloaded, total) => {
 			tracker.video = { downloaded, total };
