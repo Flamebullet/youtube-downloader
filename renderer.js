@@ -317,7 +317,6 @@ document.getElementById('directory').addEventListener('change', async (event) =>
 	}
 
 	if (videoElement) {
-		console.log(videoItag);
 		video = ytdl(fullYoutubeURL, {
 			quality: `${videoItag}`
 		}).on('progress', (_, downloaded, total) => {
