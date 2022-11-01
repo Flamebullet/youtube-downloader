@@ -17,25 +17,34 @@ const search = require('yt-search');
 const videoRegex = /^\s*\<?(https?:\/\/)?((w{3}\.)|(m\.)|(music\.))?(youtube\.com\/(watch\?(\S+)?v\=)|youtu\.be\/)(?<urlkey>[\S]{11})\>?\s*/gim;
 const spotifyMusicRegex = /^\s*\<?(https?:\/\/)?(open\.spotify\.com\/track\/)(?<urlkey>[\S]{22})(\?si\=\S{0,22})?\>?\s*/gim;
 
+let videoName, videoItag;
+
 // Set text for version
 document.getElementById('version').innerText = updater.version;
 attachUpdaterHandlers();
 updater.checkForUpdates();
 let downloadingUpdates = false;
 var modal = document.getElementById('myModal');
-var previewModal = document.getElementById('videoModal');
 var modalCloseButton = document.getElementById('close');
+var previewModal = document.getElementById('videoModal');
 var previewModalCloseButton = document.getElementById('video-close');
+var qualityModal = document.getElementById('qualityModal');
+var qualityModalCloseButton = document.getElementById('quality-close');
 
-// When the user clicks on <span> (x), close the modal
+// When the user clicks on <span> (x), close the search modal
 modalCloseButton.onclick = function () {
 	modal.style.display = 'none';
 };
 
-// When the user clicks on <span> (x), close the modal
+// When the user clicks on <span> (x), close the preview modal
 previewModalCloseButton.onclick = function () {
 	document.getElementById('video-modal-body').innerHTML = '<div class="loader"></div>';
 	previewModal.style.display = 'none';
+};
+
+// When the user clicks on <span> (x), close the quality modal
+qualityModalCloseButton.onclick = function () {
+	qualityModal.style.display = 'none';
 };
 
 // When the user clicks anywhere outside of the modal, close it
@@ -45,6 +54,8 @@ window.onclick = function (event) {
 	} else if (event.target == previewModal) {
 		document.getElementById('video-modal-body').innerHTML = '<div class="loader"></div>';
 		previewModal.style.display = 'none';
+	} else if (event.target == qualityModal) {
+		qualityModal.style.display = 'none';
 	}
 };
 
@@ -55,6 +66,9 @@ window.addEventListener('resize', () => {
 	document
 		.getElementById('video-modal-body')
 		.style.setProperty('height', 'calc(100% - ' + document.getElementById('video-modal-header-block').clientHeight + 'px - 4px)');
+	document
+		.getElementById('quality-modal-body')
+		.style.setProperty('height', 'calc(100% - ' + document.getElementById('quality-modal-header-block').clientHeight + 'px - 4px)');
 });
 
 // Handling updates
@@ -96,7 +110,7 @@ document.getElementById('download').addEventListener('click', async (event) => {
 	}
 
 	if (url.match(videoRegex) || url.match(spotifyMusicRegex)) {
-		document.getElementById('directory').click();
+		selectVideoQuality(url);
 	} else if (url != '') {
 		document.getElementById('url').value = '';
 		document.getElementById('modal-header-content').innerHTML = `Search Results for: ${url}`;
@@ -147,7 +161,7 @@ document.getElementById('download').addEventListener('click', async (event) => {
 				var id = parseInt(this.getAttribute('id').slice(8));
 				document.getElementById('url').value = videos[id].url;
 				modal.style.display = 'none';
-				document.getElementById('directory').click();
+				selectVideoQuality(videos[id].url);
 			}
 
 			// function to show another modal with preview of selected video
@@ -200,6 +214,35 @@ document.getElementById('download').addEventListener('click', async (event) => {
 	}
 });
 
+async function selectVideoQuality(url) {
+	if (document.getElementById('video').checked) {
+		videoName = await ytdl.getInfo(url).catch((err) => {
+			swal(`${err}`, 'Unable to get information for this video, try again or try another video', 'error');
+		});
+		// create a html dropdown menu to select video quality
+		let videoQualityHTML = `<div class="selectdiv"><label><select id="video-quality">`;
+		let videoFormats = ytdl.filterFormats(videoName.formats, 'videoonly');
+		for (i in videoFormats) {
+			let video = videoFormats[i];
+			videoQualityHTML += `<option value="${video.itag}">bitrate: ${video.bitrate} | ${video.container} | ${video.qualityLabel}</option>`;
+		}
+		videoQualityHTML += `</select>`;
+		videoQualityHTML += `<button class="search-download-button" id="videoqualitydownload" style="float: right !important;">Download</button></label></div>`;
+		videoQualityHTML += `<link rel="stylesheet" type="text/css" href=".\\content\\dropdown.css">`;
+
+		document.getElementById('quality-modal-body').innerHTML = videoQualityHTML;
+
+		document.getElementById('videoqualitydownload').addEventListener('click', async (event) => {
+			videoItag = document.getElementById('video-quality').value;
+			qualityModal.style.display = 'none';
+			document.getElementById('directory').click();
+		});
+		qualityModal.style.display = 'block';
+	} else {
+		document.getElementById('directory').click();
+	}
+}
+
 document.getElementById('directory').addEventListener('change', async (event) => {
 	if (document.getElementById('directory').files.length == 0) {
 		return swal('Error!', 'Download path must be selected!', 'error');
@@ -243,10 +286,6 @@ document.getElementById('directory').addEventListener('change', async (event) =>
 		merged: { frame: 0, speed: '0x', fps: 0 }
 	};
 
-	const videoName = await ytdl.getInfo(fullYoutubeURL).catch((err) => {
-		swal(`${err}`, 'Unable to get information for this video, try again or try another video', 'error');
-	});
-
 	if (!videoName) return;
 	if (videoName.videoDetails.isLiveContent) {
 		proceedLive = await swal({
@@ -278,9 +317,9 @@ document.getElementById('directory').addEventListener('change', async (event) =>
 	}
 
 	if (videoElement) {
+		console.log(videoItag);
 		video = ytdl(fullYoutubeURL, {
-			filter: 'videoonly',
-			quality: 'highestvideo'
+			quality: `${videoItag}`
 		}).on('progress', (_, downloaded, total) => {
 			tracker.video = { downloaded, total };
 		});
@@ -313,6 +352,23 @@ document.getElementById('directory').addEventListener('change', async (event) =>
 		document.getElementById('download-progress').innerText = output;
 	};
 
+	let filename;
+	if (videoElement) {
+		filename = `${filePath}\\${videoName.videoDetails.title.replaceAll(/\*|\.|\?|\"|\/|\\|\:|\||\<|\>/gi, '')}.mp4`;
+	} else {
+		filename = `${filePath}\\${videoName.videoDetails.title.replaceAll(/\*|\.|\?|\"|\/|\\|\:|\||\<|\>/gi, '')}.mp3`;
+	}
+
+	if (fs.existsSync(filename)) {
+		let i = 1;
+		while (fs.existsSync(filename)) {
+			videoElement
+				? (filename = `${filePath}\\${videoName.videoDetails.title.replaceAll(/\*|\.|\?|\"|\/|\\|\:|\||\<|\>/gi, '')} (${i}).mp4`)
+				: (filename = `${filePath}\\${videoName.videoDetails.title.replaceAll(/\*|\.|\?|\"|\/|\\|\:|\||\<|\>/gi, '')} (${i}).mp3`);
+			i++;
+		}
+	}
+
 	if (audioElement && videoElement) {
 		// Start the ffmpeg child process
 		const ffmpegProcess = cp.spawn(
@@ -339,7 +395,7 @@ document.getElementById('directory').addEventListener('change', async (event) =>
 				'-c:v',
 				'copy',
 				// Define output file
-				`${filePath}\\${videoName.videoDetails.title.replaceAll(/\*|\.|\?|\"|\/|\\|\:|\||\<|\>/gi, '')}.mp4`
+				filename
 			],
 			{
 				windowsHide: true,
@@ -411,7 +467,7 @@ document.getElementById('directory').addEventListener('change', async (event) =>
 				'-qscale:a',
 				'0',
 				'-y',
-				`${filePath}\\${videoName.videoDetails.title.replaceAll(/\*|\.|\?|\"|\/|\\|\:|\||\<|\>/gi, '')}.mp3`
+				filename
 			],
 			{
 				windowsHide: true,
@@ -444,7 +500,7 @@ document.getElementById('directory').addEventListener('change', async (event) =>
 		audio.pipe(ffmpegProcess.stdio[4]);
 	} else if (videoElement) {
 		if (!progressbarHandle) progressbarHandle = setInterval(showProgress, progressbarInterval);
-		video.pipe(fs.createWriteStream(`${filePath}\\${videoName.videoDetails.title.replaceAll(/\*|\.|\?|\"|\/|\\|\:|\||\<|\>/gi, '')}.mp4`));
+		video.pipe(fs.createWriteStream(filename));
 		video.on('end', () => {
 			clearInterval(progressbarHandle);
 			document.getElementById('download-progress').innerText = '';
