@@ -167,30 +167,7 @@ document.getElementById('download').addEventListener('click', async (event) => {
 			// function to show another modal with preview of selected video
 			async function showVideoPreview() {
 				var id = parseInt(this.getAttribute('id').slice(7));
-				previewModal.style.display = 'block';
-
-				// Display spinner while loading
-				document.getElementById('video-modal-header-content').innerHTML = `Previewing: ${videos[id].title}`;
-				document
-					.getElementById('video-modal-body')
-					.style.setProperty('height', 'calc(100% - ' + document.getElementById('video-modal-header-block').clientHeight + 'px - 4px)');
-				document.getElementById('video-modal-body').innerHTML = '<div class="loader"></div>';
-
-				var videourl = '';
-				try {
-					const video = await ytdl.getInfo(videos[id].url);
-					videourl = video.player_response.streamingData.formats[video.player_response.streamingData.formats.length - 1].url;
-				} catch (err) {
-					console.log(err);
-				}
-				document.getElementById('video-modal-body').innerHTML = `
-                    <video controls="true" class="embed-responsive-item" height="98%" width="100%" aspect-ratio="16/9" poster="${videos[id].thumbnail}">
-                        <source
-                            src="${videourl}"
-                            type="video/mp4"
-                        />
-                    </video>
-                `;
+				selectVideoQuality(videos[id].url);
 			}
 
 			// Add listeners to listen for clicks on title or thumbnail
@@ -215,12 +192,43 @@ document.getElementById('download').addEventListener('click', async (event) => {
 });
 
 async function selectVideoQuality(url) {
+	videoName = await ytdl.getInfo(url).catch((err) => {
+		swal(`${err}`, 'Unable to get information for this video, try again or try another video', 'error');
+		return false;
+	});
+	console.log(videoName);
+	if (!videoName) return;
+	document.getElementById('url').value = url;
+
+	modal.style.display = 'none';
+	qualityModal.style.display = 'block';
+
+	// Display spinner while loading
+	document.getElementById('quality-modal-header-content').innerHTML = `Previewing: ${videoName.videoDetails.title}`;
+	document
+		.getElementById('quality-modal-body')
+		.style.setProperty('height', 'calc(100% - ' + document.getElementById('quality-modal-header-block').clientHeight + 'px - 4px)');
+	document.getElementById('quality-modal-body').innerHTML = '<div class="loader"></div>';
+
+	var videourl = '';
+	try {
+		videourl = videoName.player_response.streamingData.formats[videoName.player_response.streamingData.formats.length - 1].url;
+	} catch (err) {
+		console.log(err);
+	}
+
+	let videoQualityHTML = `
+        <video controls="true" class="embed-responsive-item" height="75%" width="100%" aspect-ratio="16/9" poster=""${videoName.videoDetails.thumbnails}>
+            <source
+                src="${videourl}"
+                type="video/mp4"
+            />
+        </video>
+    `;
+
 	if (document.getElementById('video').checked) {
-		videoName = await ytdl.getInfo(url).catch((err) => {
-			swal(`${err}`, 'Unable to get information for this video, try again or try another video', 'error');
-		});
 		// create a html dropdown menu to select video quality
-		let videoQualityHTML = `<div class="selectdiv"><label><select id="video-quality">`;
+		videoQualityHTML += `<div class="selectdiv"><label><select id="video-quality">`;
 		let videoFormats = ytdl.filterFormats(videoName.formats, 'videoonly');
 		for (i in videoFormats) {
 			let video = videoFormats[i];
@@ -229,18 +237,17 @@ async function selectVideoQuality(url) {
 		videoQualityHTML += `</select>`;
 		videoQualityHTML += `<button class="search-download-button" id="videoqualitydownload" style="float: right !important;">Download</button></label></div>`;
 		videoQualityHTML += `<link rel="stylesheet" type="text/css" href=".\\content\\dropdown.css">`;
-
-		document.getElementById('quality-modal-body').innerHTML = videoQualityHTML;
-
-		document.getElementById('videoqualitydownload').addEventListener('click', async (event) => {
-			videoItag = document.getElementById('video-quality').value;
-			qualityModal.style.display = 'none';
-			document.getElementById('directory').click();
-		});
-		qualityModal.style.display = 'block';
 	} else {
-		document.getElementById('directory').click();
+		videoQualityHTML += `<button class="search-download-button" id="videoqualitydownload" style="float: right !important;">Download</button>`;
 	}
+
+	document.getElementById('quality-modal-body').innerHTML = videoQualityHTML;
+
+	document.getElementById('videoqualitydownload').addEventListener('click', async (event) => {
+		if (document.getElementById('video').checked) videoItag = document.getElementById('video-quality').value;
+		qualityModal.style.display = 'none';
+		document.getElementById('directory').click();
+	});
 }
 
 document.getElementById('directory').addEventListener('change', async (event) => {
