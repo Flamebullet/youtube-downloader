@@ -228,14 +228,14 @@ async function selectVideoQuality(url) {
 
 	if (document.getElementById('video').checked) {
 		// create a html dropdown menu to select video quality
-		videoQualityHTML += `<div class="selectdiv"><label><select id="video-quality">`;
+		videoQualityHTML += `<div class="selectdiv"><table id="center"><tr><td><select id="video-quality">`;
 		let videoFormats = ytdl.filterFormats(videoName.formats, 'videoonly');
 		for (i in videoFormats) {
 			let video = videoFormats[i];
 			videoQualityHTML += `<option value="${video.itag}">bitrate: ${video.bitrate} | ${video.container} | ${video.qualityLabel}</option>`;
 		}
-		videoQualityHTML += `</select>`;
-		videoQualityHTML += `<button class="search-download-button" id="videoqualitydownload" style="float: right !important;">Download</button></label></div>`;
+		videoQualityHTML += `</select></td><td>`;
+		videoQualityHTML += `<button class="search-download-button" id="videoqualitydownload" style="float: right !important;">Download</button></td><tr></table></div>`;
 		videoQualityHTML += `<link rel="stylesheet" type="text/css" href=".\\content\\dropdown.css">`;
 	} else {
 		videoQualityHTML += `<button class="search-download-button" id="videoqualitydownload" style="float: right !important;">Download</button>`;
