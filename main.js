@@ -7,8 +7,8 @@ const updater = require('electron-simple-updater');
 if (require('electron-squirrel-startup')) app.quit();
 
 updater.init({
-	checkUpdateOnStart: false,
-	autoDownload: false,
+	checkUpdateOnStart: true,
+	autoDownload: true,
 	url: 'https://raw.githubusercontent.com/Flamebullet/youtube-downloader/main/updates.json'
 });
 
